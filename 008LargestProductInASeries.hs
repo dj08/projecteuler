@@ -1,3 +1,4 @@
+import Data.List(tails, foldl')
 {-
 Largest product in a series
 Problem 8
@@ -41,9 +42,17 @@ myResult x y = max (myProd xds) (myProd (tail xds))
                       | length xs == y = product xs
                       | otherwise = max (product (take y xs)) (myProd (tail xs))
 
--- myResult :: [Int] -> Int -> Int
--- myResult (m:n:o:p:[]) bigProd = max (product [m,n,o,p]) bigProd
--- myResult (a:b:c:d:xs) bigProd =
---   myResult (b:c:d:xs) (max (product [a,b,c,d]) bigProd)
--- myResult _ _ = error "List too small!"
 
+-- Much more elegant, without explicit recursion! Takes lesser space!
+myResult' :: Integer -> Int -> Integer
+myResult' x y = maximum . map (product . take y) . tails $ myDigits x
+
+-- Way cooler, faster at the expense of memory...
+myResult'' :: Integer -> Int -> Integer
+myResult'' x y = foldr f 1 $ tails . myDigits $ x
+                 where f xs acc = max acc $ product (take y xs)
+
+-- The same cool solution, without memory expense!
+myResult''' :: Integer -> Int -> Integer
+myResult''' x y = foldl' f 1 $ tails . myDigits $ x
+                 where f acc xs = max acc $ product (take y xs)
