@@ -21,14 +21,30 @@ squareRoot n =
        isRoot r  =  r^!2 <= n && n < (r+1)^!2
   in  head $ dropWhile (not . isRoot) iters
 
--- My own algo, near to but not as optimal as Sieve of Eratosthenes
+-- My own algo, near to but theoritically not as optimal as Sieve of
+-- Eratosthenes. Takes 1.71s on my machine.
 primesBelowN :: Integer -> [Integer]
-primesBelowN n = 2:3:filter f [6*k+i | k <- [1..(n-1)`div`6], i <- [-1, 1]]
+primesBelowN n = 2:3:filter f [6*k+i | k <- [1..(n-1) `div` 6], i <- [-1, 1]]
                      where f x = foldr g True xs
                                  where g t ac = (x `rem` t /= 0) && ac
-                                       xs = [5, 7..squareRoot x]
+                                       xs = takeWhile (<= squareRoot x) $ tail $ primesBelowN n
 
-main = print $ sum $ primesBelowN 2000000
+-- A recursively created sieve... better performance now. Takes 1.238s! :)
+primesBelowN' n =
+  2:3:myList (0, [6*k+i | k <- [1..(n-1)`div`6], i <- [-1, 1]])
+      where
+        g :: Integer -> Integer -> Bool
+        g x y = y `rem` x /= 0
+        myList :: (Integer, [Integer]) -> [Integer]
+        myList (sv, ys) 
+          | k <= sn   = myList (k+sv, filter (g k) ys)
+          | otherwise = [sv, sum (filter (g sn) ys)]
+              where k  = head ys
+                    sn = squareRoot n
+        -- myList ([], yi) = myList ([5], filter (g 5) yi)
+
+
+main = print $ sum $ primesBelowN' 2000000
 
 {-
 
