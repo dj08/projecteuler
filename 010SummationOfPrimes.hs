@@ -1,3 +1,9 @@
+import Control.Monad (forM_, when)
+import Control.Monad.ST
+import Data.Array.ST
+import Data.Array.Unboxed
+import Data.List (sort)
+
 {-
 Summation of Primes
 Problem 9
@@ -46,7 +52,25 @@ primesBelowN' n =
 --          | k <= sn   = myList (k:sv, filter (g k) ys)
 --          | otherwise = (reverse sv) ++ filter (g sn) ys 
 
-main = print $ sum $ primesBelowN' 2000000
+-- A way faster approach using stateful programming. Refer
+-- https://programmingpraxis.files.wordpress.com/
+-- 2012/09/programmingwithprimenumbers.pdf for details. This is not my algo,
+-- just keeping here for future reference.
+ancientSieve :: Int -> UArray Int Bool
+ancientSieve n = runSTUArray $ do
+    bits <- newArray (2, n) True
+    forM_ [2 .. n] $ \p -> do
+        isPrime <- readArray bits p
+        when isPrime $ do
+            forM_ [2*p, 3*p .. n] $ \i -> do
+                writeArray bits i False
+    return bits
+
+primesBelowN'' :: Int -> [Int]
+primesBelowN'' n = [p | (p, True) <-
+                  assocs $ ancientSieve n]
+
+main = print $ sum $ primesBelowN'' 2000000
 
 {-
 
