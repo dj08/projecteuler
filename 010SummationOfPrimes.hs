@@ -41,8 +41,10 @@ primesBelowN' n =
           | otherwise = [sv, sum (filter (g sn) ys)]
               where k  = head ys
                     sn = squareRoot n
-        -- myList ([], yi) = myList ([5], filter (g 5) yi)
-
+-- Do this to create a sieve instead of doing the sum
+--          myList :: ([Integer], [Integer]) -> [Integer]
+--          | k <= sn   = myList (k:sv, filter (g k) ys)
+--          | otherwise = (reverse sv) ++ filter (g sn) ys 
 
 main = print $ sum $ primesBelowN' 2000000
 
